@@ -38,6 +38,8 @@ type SessionVal = Maybe SessionId
 type ApiApp ctx = SpockCtxM ctx SqlBackend SessionVal ApiCfg ()
 type ApiAction ctx a = SpockActionCtx ctx SqlBackend SessionVal ApiCfg a
 -- ctxとaを受けとrうApiActionを定義
+-- type SpockActionCtx ctx conn sess st = ActionCtxT ctx (WebStateM conn sess st)
+--                     ^   ^    ^    ^ 多層型の型シノニム（型によって振る舞いが変わるように定義されているはず）
 
 runApi :: ApiCfg -> IO ()
 runApi bcfg = do
@@ -50,19 +52,25 @@ apiApp :: ApiApp ()
 apiApp = prehook baseHook $ do
   middleware (staticPolicy (addBase "static"))
   prehook guestOnlyHook $ do
-    post "/api/register" registerAction
-    post "/api/login" loginAction
-  prehook authHook $ do
-    get "/api/logout" logoutAction
+    getpost "/api/register" registerAction
+  --  post "/api/login" loginAction
+  --prehook authHook $ do
+  --  get "/api/logout" logoutAction
     -- prehook authorHook $
     --   getpost "/write" writeAction
     -- prehook adminHook $
     --   get "/manage" manageAction
 
 registerAction :: (ListContains n IsGuest xs, NotInList (UserId, User) xs ~ 'True) => ApiAction (HVect xs) a
-registerAction = do
-  f <- runForm "registerForm" registerForm
+registerAction = do -- ApiAction do
+  f <- runForm "registerForm" registerForm -- ApiActionだったらbindして取れる
+  -- runForm :: MonadIO m =>
+  --      T.Text                                               "registerForm"
+  --      -> Form v (ActionCtxT ctx m) a                       "Monad m => Form Html m               RegisterRequest"
+  --                                                                       Form v    (ActionCtxT...) a
+  --      -> ActionCtxT ctx m (View v, Maybe a)
   let formView mErr view = panelWithErrorView "Register" mErr $ renderForm registerFormSpec view
+  -- 関数合成 panelWithErrorView . renderForm = formView
   case f of
     (view, Nothing) ->
         mkSite' (formView Nothing view)

@@ -8,13 +8,12 @@ import Text.Digestive
 import Text.Digestive.Bootstrap
 import qualified Data.Text as T
 
-data RegisterRequest
-   = RegisterRequest
-   { rr_username :: T.Text
-   , rr_password :: T.Text
-   , rr_passwordConfirm :: T.Text
-   , rr_email :: T.Text
-   } deriving (Show)
+data RegisterRequest = RegisterRequest {
+                       rr_username :: T.Text
+ , rr_password :: T.Text
+ , rr_passwordConfirm :: T.Text
+ , rr_email :: T.Text
+ } deriving (Show)
 
 registerForm :: Monad m => Form Html m RegisterRequest
 registerForm =
