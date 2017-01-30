@@ -21,7 +21,7 @@ import Control.Monad.Logger
 import Control.Monad.Trans
 import Data.HVect
 import Data.Time
-import Database.Persist.Sqlite hiding (get)
+import Database.Persist.MySQL hiding (get)
 import Network.Wai.Middleware.Static
 import Text.Blaze.Html (Html, toHtml)
 import Text.Digestive.Bootstrap (renderForm)
@@ -33,50 +33,44 @@ import qualified Data.Text as T
 import qualified Network.HTTP.Types.Status as Http
 
 type SessionVal = Maybe SessionId
-type BlogApp ctx = SpockCtxM ctx SqlBackend SessionVal BlogState ()
-type BlogAction ctx a = SpockActionCtx ctx SqlBackend SessionVal BlogState a
+type BlogApp ctx = SpockCtxM ctx SqlBackend SessionVal BlogCfg ()
+type BlogAction ctx a = SpockActionCtx ctx SqlBackend SessionVal BlogCfg a
 
-data BlogState
-   = BlogState
-   { bs_cfg :: BlogCfg
-   }
-
-data BlogCfg
-   = BlogCfg
-   { bcfg_db   :: T.Text
-   , bcfg_port :: Int
-   , bcfg_name :: T.Text
-   , bcfg_desc :: T.Text
-   }
+data BlogCfg = BlogCfg {
+    port :: Int
+  , dbConfig :: ConnectInfo
+  }
 
 parseConfig :: FilePath -> IO BlogCfg
-parseConfig cfgFile =
-    do cfg <- C.load [C.Required cfgFile]
-       db <- C.require cfg "db"
-       port <- C.require cfg "port"
-       name <- C.require cfg "blogName"
-       desc <- C.require cfg "blogDescription"
-       return (BlogCfg db port name desc)
+parseConfig cfgFile = do
+  cfg <- C.load [C.Required cfgFile]
+  port_ <- C.require cfg "port"
+  dbHost <- C.require cfg "db.host"
+  dbPort <- C.require cfg "db.port"
+  dbUser <- C.require cfg "db.user"
+  dbPassword <- C.require cfg "db.password"
+  dbName <- C.require cfg "db.name"
+  let dbConfig_ = defaultConnectInfo {
+      connectHost = dbHost
+    , connectPort = dbPort
+    , connectUser = dbUser
+    , connectPassword = dbPassword
+    , connectDatabase = dbName
+  }
+  return (BlogCfg port_ dbConfig_)
 
 runBlog :: BlogCfg -> IO ()
-runBlog bcfg =
-    do pool <- runNoLoggingT $ createSqlitePool (bcfg_db bcfg) 5
-       runNoLoggingT $ runSqlPool (runMigration migrateCore) pool
-       spockCfg <- defaultSpockCfg Nothing (PCPool pool) (BlogState bcfg)
-       runSpock (bcfg_port bcfg) $ spock spockCfg blogApp
+runBlog bcfg = do
+  pool <- runNoLoggingT $ createMySQLPool (dbConfig bcfg) 5
+  runNoLoggingT $ runSqlPool (runMigration migrateCore) pool
+  spockCfg <- defaultSpockCfg Nothing (PCPool pool) bcfg
+  runSpock (port bcfg) $ spock spockCfg blogApp
 
 mkSite :: (SiteView -> Html) -> BlogAction ctx a
 mkSite content =
-    maybeUser $ \mUser ->
-    do blogSt <- getState
-       let cfg = bs_cfg blogSt
-           sv =
-               SiteView
-               { sv_blogName = bcfg_name cfg
-               , sv_blogDesc = bcfg_desc cfg
-               , sv_user = fmap snd mUser
-               }
-       blaze $ siteView sv (content sv)
+  maybeUser $ \mUser -> do
+    let sv = SiteView { sv_user = fmap snd mUser }
+    blaze $ siteView sv (content sv)
 
 mkSite' :: Html -> BlogAction ctx a
 mkSite' content = mkSite (const content)

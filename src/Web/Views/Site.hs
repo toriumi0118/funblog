@@ -10,18 +10,13 @@ import qualified Text.Blaze.Bootstrap as H
 import qualified Text.Blaze.XHtml5 as H
 import qualified Text.Blaze.XHtml5.Attributes as A
 
-data SiteView
-   = SiteView
-   { sv_blogName :: T.Text
-   , sv_blogDesc :: T.Text
-   , sv_user :: Maybe User
-   }
+data SiteView = SiteView { sv_user :: Maybe User }
 
 siteView :: SiteView -> H.Html -> H.Html
 siteView sv body =
     H.html $
     do H.head $
-        do H.title (H.toHtml $ sv_blogName sv)
+        do H.title "test blog title"
            H.meta ! A.charset "utf-8"
            H.meta ! A.name "viewport" ! A.content "width=device-width, initial-scale=1"
            H.link ! A.href "/css/bootstrap.min.css" ! A.rel "stylesheet"

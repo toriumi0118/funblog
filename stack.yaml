@@ -15,4 +15,4 @@ extra-deps:
 - digestive-bootstrap-0.1.0.1
 - blaze-bootstrap-0.1.0.1
 - digestive-functors-blaze-0.6.0.6
-resolver: lts-5.8
+resolver: lts-6.28

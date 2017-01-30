@@ -13,8 +13,8 @@ import qualified Text.Blaze.XHtml5.Attributes as A
 homeView :: [Entity Post] -> SiteView -> H.Html
 homeView posts sv =
     do H.div ! A.class_ "blog-header" $
-        do H.h1 ! A.class_ "blog-title" $ H.toHtml $ sv_blogName sv
-           H.p ! A.class_ "lead blog-description" $ H.toHtml $ sv_blogDesc sv
+        do H.h1 ! A.class_ "blog-title" $ "test blog"
+           H.p ! A.class_ "lead blog-description" $ "test description"
        H.div ! A.class_ "row" $
         do H.div ! A.class_ "col-sm-8 blog-main" $
             forM_ posts $ \post ->
