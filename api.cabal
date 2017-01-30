@@ -1,8 +1,8 @@
-name:                funblog
-version:             0.4.1.0
-synopsis:            Blog written in Haskell
-description:         A simple yet powerfull blog software
-homepage:            https://github.com/agrafix/funblog
+name:                api
+version:             0.0
+synopsis:            navi api written in Haskell
+description:         json api server for holg new app
+homepage:            
 license:             Apache-2.0
 license-file:        LICENSE
 author:              Alexander Thiemann <mail@athiemann.net>
@@ -23,13 +23,13 @@ extra-source-files:
     static/fonts/glyphicons-halflings-regular.woff
     static/js/bootstrap.min.js
 
-executable funblog
+executable api
   main-is:             Bootstrap.hs
   other-modules:
                        Model.CoreTypes
                        Model.ResponseTypes
                        Web.Actions.User
-                       Web.Blog
+                       Web.Api
                        Web.Forms.Common
                        Web.Forms.Login
                        Web.Forms.Post
@@ -37,6 +37,7 @@ executable funblog
                        Web.Utils
                        Web.Views.Home
                        Web.Views.Site
+                       Setting.Config
   build-depends:
                        Spock >=0.11,
                        Spock-digestive >=0.3,

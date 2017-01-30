@@ -1,8 +1,8 @@
 module Main where
 
-import Web.Blog
-
 import System.Environment
+import Web.Api
+import Setting.Config
 
 main :: IO ()
 main = do
@@ -13,5 +13,5 @@ main = do
     putStrLn ""
     putStrLn "Configure using the blog.cfg file"
   else do
-    cfg <- parseConfig "blog.cfg"
+    cfg <- parseConfig "api.cfg"
     runBlog cfg

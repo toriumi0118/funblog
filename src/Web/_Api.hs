@@ -4,7 +4,7 @@
 {-# LANGUAGE FlexibleContexts #-}
 {-# LANGUAGE TypeOperators #-}
 {-# LANGUAGE ScopedTypeVariables #-}
-module Web.Blog where
+module Web.Api where
 
 import Model.CoreTypes
 import Model.ResponseTypes
@@ -32,32 +32,11 @@ import qualified Data.Configurator as C
 import qualified Data.Text as T
 import qualified Network.HTTP.Types.Status as Http
 
+import Setting.Config
+
 type SessionVal = Maybe SessionId
 type BlogApp ctx = SpockCtxM ctx SqlBackend SessionVal BlogCfg ()
 type BlogAction ctx a = SpockActionCtx ctx SqlBackend SessionVal BlogCfg a
-
-data BlogCfg = BlogCfg {
-    port :: Int
-  , dbConfig :: ConnectInfo
-  }
-
-parseConfig :: FilePath -> IO BlogCfg
-parseConfig cfgFile = do
-  cfg <- C.load [C.Required cfgFile]
-  port_ <- C.require cfg "port"
-  dbHost <- C.require cfg "db.host"
-  dbPort <- C.require cfg "db.port"
-  dbUser <- C.require cfg "db.user"
-  dbPassword <- C.require cfg "db.password"
-  dbName <- C.require cfg "db.name"
-  let dbConfig_ = defaultConnectInfo {
-      connectHost = dbHost
-    , connectPort = dbPort
-    , connectUser = dbUser
-    , connectPassword = dbPassword
-    , connectDatabase = dbName
-  }
-  return (BlogCfg port_ dbConfig_)
 
 runBlog :: BlogCfg -> IO ()
 runBlog bcfg = do
