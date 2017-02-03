@@ -8,12 +8,13 @@ import Text.Digestive
 import Text.Digestive.Bootstrap
 import qualified Data.Text as T
 
-data RegisterRequest = RegisterRequest {
-                       rr_username :: T.Text
- , rr_password :: T.Text
- , rr_passwordConfirm :: T.Text
- , rr_email :: T.Text
- } deriving (Show)
+data RegisterRequest =
+  RegisterRequest {
+    rr_username :: T.Text
+  , rr_password :: T.Text
+  , rr_passwordConfirm :: T.Text
+  , rr_email :: T.Text
+  } deriving (Show)
 
 registerForm :: Monad m => Form Html m RegisterRequest
 registerForm =
@@ -21,6 +22,11 @@ registerForm =
                     <*> "password1" .: passwordFormlet Nothing
                     <*> "password2" .: passwordFormlet Nothing
                     <*> "email" .: emailFormlet Nothing
+-- (.:) :: Monad m => T.Text -> Form Html Maybe a -> Form Html Maybe a
+-- RegisterRequest <$> Form Html Maybe a
+-- <$> ::  Functor f => (a -> b) -> f a -> f b
+-- Form Html Maybe RegisterRequest a
+--  
 
 registerFormSpec :: FormMeta
 registerFormSpec =

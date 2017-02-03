@@ -18,6 +18,7 @@ minMaxLen (minLen, maxLen) t =
 usernameFormlet :: Monad m => Maybe T.Text -> Form H.Html m T.Text
 usernameFormlet mTxt =
     validate (minMaxLen (3, 12)) (text mTxt)
+-- Web.Spock.text :: MonadIO m => T.Text -> ActionCtxT ctx m a
 
 passwordFormlet :: Monad m => Maybe T.Text -> Form H.Html m T.Text
 passwordFormlet mTxt =
